@@ -1,0 +1,442 @@
+openapi: 3.0.3
+info:
+  title: Products And Seller Management Swagger
+  description: |-
+    Документация API модуля управления товарами и поставщиками
+  version: 1.0.0
+tags:
+  - name: Products
+    description: Products Management
+  - name: Suppliers
+    description: Suppliers Management
+
+security:
+  - OAuth2_Local: [ ]
+  - OAuth2_Integration: [ ]
+paths:
+  /management/products/{status}:
+    get:
+      tags:
+        - Products
+      summary: Get Products info (detailed)
+      description: Returns Products detailed information
+      operationId: ProductsByGet
+      security:
+        - OAuth2_Local: [ ]
+        - OAuth2_Integration: [ ]
+      parameters:
+        - $ref: '#/components/parameters/productStatusQuery'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponse'
+        '400':
+          description: Bad Request/Internal Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+  /management/suppliers:
+    get:
+      tags:
+        - Suppliers
+      summary: Get suppliers info
+      description: Returns suppliers information
+      operationId: suppliersByGet
+      security:
+        - OAuth2_Local: [ ]
+        - OAuth2_Integration: [ ]
+      parameters:
+        - $ref: '#/components/parameters/SupplierStatusQuery'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuppliersResponse'
+        '400':
+          description: Bad Request/Internal Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+#  /products/{productId}/{status}:
+#    patch:
+#      tags:
+#        - Products
+#      summary: Edit good status by productId
+#      description: Finds good by productId and updates it's status
+#      operationId: ProductstatusByPatch
+#      security:
+#        - OAuth2_Local: []
+#        - OAuth2_Integration: []
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/PatchProductStatusRequest'
+#      responses:
+#        '200':
+#          description: OK
+#          content:
+#            application/json:
+#              schema:
+#                type: string
+#                example: 10002
+#                description: Updated Product ID
+#        '400':
+#          description: Bad Request/Internal Validation Error
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/ErrorResponse'
+#        '500':
+#          description: Internal Server Error
+
+components:
+  securitySchemes:
+    OAuth2_Local:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: http://localhost:8444/realms/local/protocol/openid-connect/token
+          scopes: { }
+
+    OAuth2_Integration:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://adrontest.com:9443/realms/adron-test/protocol/openid-connect/token
+          scopes: { }
+
+  parameters:
+    productStatusQuery:
+      in: path
+      name: status
+      required: true
+      description: Products status path param
+      example: NOT_PROCESSED
+      schema:
+        $ref: '#/components/schemas/productStatusEnum'
+    SupplierStatusQuery:
+      in: query
+      name: status
+      required: true
+      description: Suppliers status query param
+      example: COOPERATING
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/SupplierStatusEnum'
+    TypeQuery:
+      in: query
+      name: type
+      required: true
+      description: Bot type query param
+      example: FUTURES_GRID
+      schema:
+        $ref: '#/components/schemas/BotType'
+
+    AccountIdQueryRequired:
+      in: query
+      name: accountId
+      description: Account ID
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 7da6038d-fc4f-48d7-8110-71a53206967c
+        nullable: false
+    IdPathRequired:
+      in: path
+      name: id
+      description: ID path required
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 7da6038d-fc4f-48d7-8110-71a53206967c
+        nullable: false
+    StrategyIdRequired:
+      in: query
+      name: strategyId
+      description: Strategy ID
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 7da6038d-fc4f-48d7-8110-71a53206967c
+        nullable: false
+    TimeframeRequired:
+      in: query
+      name: timeframe
+      description: Timeframe
+      required: true
+      schema:
+        type: string
+        example: FIVE_MINUTES
+        nullable: false
+    MinPriceRequired:
+      in: query
+      name: minPrice
+      description: Min Price
+      required: true
+      schema:
+        type: number
+        example: 123.45
+        nullable: false
+    MaxPriceRequired:
+      in: query
+      name: maxPrice
+      description: Max Price
+      required: true
+      schema:
+        type: number
+        example: 123.45
+        nullable: false
+    PageQuery:
+      name: page
+      in: query
+      description: Page number starting with 0 (0 by default)
+      required: false
+      schema:
+        type: integer
+        example: 0
+        default: 0
+        nullable: false
+    SortBotsStrategyIdQuery:
+      name: sort
+      in: query
+      description: Page items order (array of string pairs)
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+        example:
+          - createdAt:asc
+          - initialAmountQuote:desc
+          - closeTime:desc
+          - status:asc
+    SortBotsQuery:
+      name: sort
+      in: query
+      description: Page items order (array of string pairs)
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+        example:
+          - initialAmountQuote:asc
+          - realizedPnl:desc
+          - createdAt:desc
+          - closeTime:desc
+    SortOrdersQuery:
+      name: sort
+      in: query
+      description: Page items order (array of string pairs)
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+        example:
+          - updatedAt:asc
+    SizeQuery:
+      name: size
+      in: query
+      description: Amount of items on one page (20 by default)
+      required: false
+      schema:
+        type: integer
+        example: 20
+        default: 20
+        nullable: false
+  schemas:
+    productStatusEnum:
+      type: string
+      example: NOT_PROCESSED
+      description: Status of good
+      enum:
+        - NOT_PROCESSED
+        - PROCESSED
+        - IGNORED
+    SupplierStatusEnum:
+      type: string
+      example: NOT_COOPERATING
+      description: Status of good
+      enum:
+        - NOT_COOPERATING
+        - BLACKLISTED
+        - MESSAGE_SENT
+        - COOPERATING
+
+    ErrorResponse:
+      type: object
+      required:
+        - errorCode
+        - message
+        - detailedMessage
+        - timestamp
+      description: Controlled Error Response
+      properties:
+        errorCode:
+          type: string
+          description: Error Business Code
+          example: AGS-08
+        message:
+          type: string
+          description: Error Description
+          example: Old password doesn't match
+        timestamp:
+          type: string
+          description: When the controlled error was produced
+          example: 2024-04-21T13:26:44.148
+        args:
+          type: object
+          description: Dynamic parameters passes as Map<String, Any>
+    BotUIStatus:
+      type: string
+      description: UI bot status
+      example: ARCHIVED
+      enum:
+        - ACTIVE
+        - ARCHIVED
+    BotStatus:
+      type: string
+      description: Bot status enum
+      example: NO_LOSS_CLOSING
+      enum:
+        - RUNNING
+        - SHUTDOWN
+        - OPENING
+        - CLOSING
+        - ERROR
+        - NO_LOSS_CLOSING
+        - WAITING_TO_BE_CLOSED
+        - UNSUCCESSFUL_START
+    BotType:
+      type: string
+      description: Bot category
+      example: FUTURES_GRID
+      enum:
+        - FUTURES_GRID
+        - SPOT_GRID
+
+    ProductsInfo:
+      type: object
+      required:
+        - productId
+        - productName
+        - status
+      properties:
+        productId:
+          type: string
+          example: 10002
+          description: Good identifier
+        productName:
+          type: string
+          example: Веревка с узлом, 25 г/15 см, Trixie (3270)
+          description: Good name
+        status:
+          type: string
+          example: NOT_PROCESSED
+          enum:
+            - NOT_PROCESSED
+            - PROCESSED
+            - IGNORED
+          description: Good status
+
+    SuppliersInfo:
+      type: object
+      required:
+        - productId
+        - productName
+        - status
+      properties:
+        productId:
+          type: string
+          example: 10002
+          description: Good identifier
+        productName:
+          type: string
+          example: Веревка с узлом, 25 г/15 см, Trixie (3270)
+          description: Good name
+        status:
+          type: string
+          example: NOT_PROCESSED
+          enum:
+            - NOT_PROCESSED
+            - PROCESSED
+            - IGNORED
+          description: Good status
+
+    ProductsResponse:
+      type: object
+      required:
+        - products
+      properties:
+        products:
+          type: array
+          description: List of Products
+          items:
+            type: string
+            example: 12345
+
+    SuppliersResponse:
+      type: object
+      required:
+        - suppliers
+      properties:
+        suppliers:
+          type: array
+          description: List of suppliers
+          items:
+            type: string
+            example: 12345
+
+    Page:
+      type: object
+      description: Page information
+      properties:
+        page:
+          type: integer
+          description: Requested page number (starting from 0)
+          example: 0
+        size:
+          type: integer
+          description: Amount of item on page
+          example: 20
+        sort:
+          type: string
+          description: Order of items on page
+          example: '"[ status:asc, name:desc ]"'
+
+    PatchProductStatusRequest:
+      type: object
+      required:
+        - productId
+        - status
+      properties:
+        productId:
+          type: string
+          description: Product Id
+          example: 10003
+        status:
+          type: string
+          example: NOT_PROCESSED
+          description: Status of good
+          enum:
+            - NOT_PROCESSED
+            - PROCESSED
+            - IGNORED
