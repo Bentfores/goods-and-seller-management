@@ -25,14 +25,67 @@ paths:
         - OAuth2_Local: [ ]
         - OAuth2_Integration: [ ]
       parameters:
-        - $ref: '#/components/parameters/productStatusQuery'
+        - $ref: '#/components/parameters/ProductStatusQuery'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductsResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductsInfo'
+        '400':
+          description: Bad Request/Internal Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+
+    patch:
+      tags:
+        - Products
+      summary: Change Products status
+      description: Changes status of products
+      operationId: ProductsByPatch
+      security:
+        - OAuth2_Local: [ ]
+        - OAuth2_Integration: [ ]
+      parameters:
+        - $ref: '#/components/parameters/ProductStatusQuery'
+        - $ref: '#/components/parameters/ArticlesQuery'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad Request/Internal Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+  /management/product-article/{article}:
+    get:
+      tags:
+        - Products
+      summary: Get Product info (detailed)
+      description: Returns Product detailed information
+      operationId: ProductByGet
+      security:
+        - OAuth2_Local: [ ]
+        - OAuth2_Integration: [ ]
+      parameters:
+        - $ref: '#/components/parameters/ArticlePath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsInfo'
         '400':
           description: Bad Request/Internal Validation Error
           content:
@@ -47,19 +100,21 @@ paths:
         - Suppliers
       summary: Get suppliers info
       description: Returns suppliers information
-      operationId: suppliersByGet
+      operationId: SuppliersByGet
       security:
         - OAuth2_Local: [ ]
         - OAuth2_Integration: [ ]
       parameters:
-        - $ref: '#/components/parameters/SupplierStatusQuery'
+        - $ref: '#/components/parameters/SuppliersStatusQuery'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuppliersResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManagementSuppliersInfo'
         '400':
           description: Bad Request/Internal Validation Error
           content:
@@ -68,39 +123,100 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal Server Error
-#  /products/{productId}/{status}:
-#    patch:
-#      tags:
-#        - Products
-#      summary: Edit good status by productId
-#      description: Finds good by productId and updates it's status
-#      operationId: ProductstatusByPatch
-#      security:
-#        - OAuth2_Local: []
-#        - OAuth2_Integration: []
-#      requestBody:
-#        required: true
-#        content:
-#          application/json:
-#            schema:
-#              $ref: '#/components/schemas/PatchProductStatusRequest'
-#      responses:
-#        '200':
-#          description: OK
-#          content:
-#            application/json:
-#              schema:
-#                type: string
-#                example: 10002
-#                description: Updated Product ID
-#        '400':
-#          description: Bad Request/Internal Validation Error
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/ErrorResponse'
-#        '500':
-#          description: Internal Server Error
+    post:
+      tags:
+        - Suppliers
+      summary: Post suppliers info
+      description: Saves new info about suppliers
+      operationId: SuppliersByPost
+      security:
+        - OAuth2_Local: [ ]
+        - OAuth2_Integration: [ ]
+      parameters:
+        - $ref: '#/components/parameters/ArticleQuery'
+        - $ref: '#/components/parameters/ImageUrlQuery'
+        - $ref: '#/components/parameters/ProductNameQuery'
+        - $ref: '#/components/parameters/ProfitPlaceQuery'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/NewSupplierInfo'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad Request/Internal Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+  /management/suppliers/names:
+    post:
+      tags:
+        - Suppliers
+      summary: Get suppliers info by names
+      description: Returns suppliers information
+      operationId: SuppliersNamesByGet
+      security:
+        - OAuth2_Local: [ ]
+        - OAuth2_Integration: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManagementSuppliersInfo'
+        '400':
+          description: Bad Request/Internal Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+  /management/suppliers/{status}:
+    patch:
+      tags:
+        - Suppliers
+      summary: Change Suppliers status
+      description: Changes status of a suppliers
+      operationId: SuppliersByPatch
+      security:
+        - OAuth2_Local: [ ]
+        - OAuth2_Integration: [ ]
+      parameters:
+        - $ref: '#/components/parameters/SupplierStatusQuery'
+        - $ref: '#/components/parameters/SuppliersQuery'
+        - $ref: '#/components/parameters/ArticleQuery'
+        - $ref: '#/components/parameters/CommentQuery'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad Request/Internal Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
 
 components:
   securitySchemes:
@@ -119,17 +235,25 @@ components:
           scopes: { }
 
   parameters:
-    productStatusQuery:
+    ProductStatusQuery:
       in: path
       name: status
       required: true
       description: Products status path param
       example: NOT_PROCESSED
       schema:
-        $ref: '#/components/schemas/productStatusEnum'
+        $ref: '#/components/schemas/ProductStatusEnum'
     SupplierStatusQuery:
-      in: query
+      in: path
       name: status
+      required: true
+      description: Products status path param
+      example: NOT_PROCESSED
+      schema:
+        $ref: '#/components/schemas/SupplierStatusEnum'
+    SuppliersStatusQuery:
+      in: query
+      name: statuses
       required: true
       description: Suppliers status query param
       example: COOPERATING
@@ -137,133 +261,79 @@ components:
         type: array
         items:
           $ref: '#/components/schemas/SupplierStatusEnum'
-    TypeQuery:
+    ArticlesQuery:
       in: query
-      name: type
+      name: articles
       required: true
-      description: Bot type query param
-      example: FUTURES_GRID
+      description: Product articles
+      example: 12345
       schema:
-        $ref: '#/components/schemas/BotType'
-
-    AccountIdQueryRequired:
+        type: array
+        items:
+          type: string
+    ArticleQuery:
       in: query
-      name: accountId
-      description: Account ID
-      required: true
+      name: article
+      required: false
+      description: Product article
+      example: 12345
       schema:
         type: string
-        format: uuid
-        example: 7da6038d-fc4f-48d7-8110-71a53206967c
-        nullable: false
-    IdPathRequired:
+    ImageUrlQuery:
+      in: query
+      name: imageUrl
+      required: false
+      description: url of an image
+      example: url
+      schema:
+        type: string
+    ProductNameQuery:
+      in: query
+      name: productName
+      required: false
+      description: product name
+      example: name
+      schema:
+        type: string
+    ProfitPlaceQuery:
+      in: query
+      name: profitPlace
+      required: false
+      description: profit place
+      example: 1
+      schema:
+        type: number
+    ArticlePath:
       in: path
-      name: id
-      description: ID path required
+      name: article
       required: true
+      description: Product article
+      example: 12345
       schema:
         type: string
-        format: uuid
-        example: 7da6038d-fc4f-48d7-8110-71a53206967c
-        nullable: false
-    StrategyIdRequired:
+    SuppliersQuery:
       in: query
-      name: strategyId
-      description: Strategy ID
+      name: suppliers
       required: true
-      schema:
-        type: string
-        format: uuid
-        example: 7da6038d-fc4f-48d7-8110-71a53206967c
-        nullable: false
-    TimeframeRequired:
-      in: query
-      name: timeframe
-      description: Timeframe
-      required: true
-      schema:
-        type: string
-        example: FIVE_MINUTES
-        nullable: false
-    MinPriceRequired:
-      in: query
-      name: minPrice
-      description: Min Price
-      required: true
-      schema:
-        type: number
-        example: 123.45
-        nullable: false
-    MaxPriceRequired:
-      in: query
-      name: maxPrice
-      description: Max Price
-      required: true
-      schema:
-        type: number
-        example: 123.45
-        nullable: false
-    PageQuery:
-      name: page
-      in: query
-      description: Page number starting with 0 (0 by default)
-      required: false
-      schema:
-        type: integer
-        example: 0
-        default: 0
-        nullable: false
-    SortBotsStrategyIdQuery:
-      name: sort
-      in: query
-      description: Page items order (array of string pairs)
-      required: false
+      description: Suppliers ids
+      example: 12345
       schema:
         type: array
         items:
           type: string
-        example:
-          - createdAt:asc
-          - initialAmountQuote:desc
-          - closeTime:desc
-          - status:asc
-    SortBotsQuery:
-      name: sort
+          format: uuid
+          example: 7da6038d-fc4f-48d7-8110-71a53206967c
+    CommentQuery:
       in: query
-      description: Page items order (array of string pairs)
+      name: comment
       required: false
+      description: Comment of sending supplier to blacklist
+      example: bad supplier
       schema:
-        type: array
-        items:
-          type: string
-        example:
-          - initialAmountQuote:asc
-          - realizedPnl:desc
-          - createdAt:desc
-          - closeTime:desc
-    SortOrdersQuery:
-      name: sort
-      in: query
-      description: Page items order (array of string pairs)
-      required: false
-      schema:
-        type: array
-        items:
-          type: string
-        example:
-          - updatedAt:asc
-    SizeQuery:
-      name: size
-      in: query
-      description: Amount of items on one page (20 by default)
-      required: false
-      schema:
-        type: integer
-        example: 20
-        default: 20
-        nullable: false
+        type: string
+
   schemas:
-    productStatusEnum:
+    ProductStatusEnum:
       type: string
       example: NOT_PROCESSED
       description: Status of good
@@ -280,6 +350,7 @@ components:
         - BLACKLISTED
         - MESSAGE_SENT
         - COOPERATING
+        - WRONG
 
     ErrorResponse:
       type: object
@@ -305,122 +376,76 @@ components:
         args:
           type: object
           description: Dynamic parameters passes as Map<String, Any>
-    BotUIStatus:
-      type: string
-      description: UI bot status
-      example: ARCHIVED
-      enum:
-        - ACTIVE
-        - ARCHIVED
-    BotStatus:
-      type: string
-      description: Bot status enum
-      example: NO_LOSS_CLOSING
-      enum:
-        - RUNNING
-        - SHUTDOWN
-        - OPENING
-        - CLOSING
-        - ERROR
-        - NO_LOSS_CLOSING
-        - WAITING_TO_BE_CLOSED
-        - UNSUCCESSFUL_START
-    BotType:
-      type: string
-      description: Bot category
-      example: FUTURES_GRID
-      enum:
-        - FUTURES_GRID
-        - SPOT_GRID
 
     ProductsInfo:
       type: object
       required:
-        - productId
-        - productName
-        - status
+        - article
+        - imageUrl
+        - name
       properties:
-        productId:
+        article:
           type: string
           example: 10002
-          description: Good identifier
-        productName:
+          description: Product article
+        imageUrl:
+          type: string
+          example: url
+          description: Image url
+        name:
           type: string
           example: Веревка с узлом, 25 г/15 см, Trixie (3270)
-          description: Good name
-        status:
-          type: string
-          example: NOT_PROCESSED
-          enum:
-            - NOT_PROCESSED
-            - PROCESSED
-            - IGNORED
-          description: Good status
-
-    SuppliersInfo:
+          description: Product name
+        profitPlace:
+          type: number
+          example: 1
+          description: Place in a profit table
+    SuppliersName:
       type: object
       required:
-        - productId
-        - productName
+        - supplierName
+      properties:
+        supplierName:
+          type: string
+          example: Guangxi Nanning Xunqianxi Trading Co., Ltd.
+          description: Supplier name
+
+    NewSupplierInfo:
+      type: object
+      required:
+        - url
+        - name
+      properties:
+        url:
+          type: string
+          example: url
+          description: Supplier url
+        name:
+          type: string
+          example: Веревка с узлом, 25 г/15 см, Trixie (3270)
+          description: Product name
+
+    ManagementSuppliersInfo:
+      type: object
+      required:
+        - supplierId
         - status
+        - name
       properties:
-        productId:
+        supplierId:
           type: string
-          example: 10002
-          description: Good identifier
-        productName:
-          type: string
-          example: Веревка с узлом, 25 г/15 см, Trixie (3270)
-          description: Good name
+          format: uuid
+          example: 7da6038d-fc4f-48d7-8110-71a53206967c
         status:
+          $ref: '#/components/schemas/SupplierStatusEnum'
+        name:
           type: string
-          example: NOT_PROCESSED
-          enum:
-            - NOT_PROCESSED
-            - PROCESSED
-            - IGNORED
-          description: Good status
-
-    ProductsResponse:
-      type: object
-      required:
-        - products
-      properties:
-        products:
-          type: array
-          description: List of Products
-          items:
-            type: string
-            example: 12345
-
-    SuppliersResponse:
-      type: object
-      required:
-        - suppliers
-      properties:
-        suppliers:
-          type: array
-          description: List of suppliers
-          items:
-            type: string
-            example: 12345
-
-    Page:
-      type: object
-      description: Page information
-      properties:
-        page:
-          type: integer
-          description: Requested page number (starting from 0)
-          example: 0
-        size:
-          type: integer
-          description: Amount of item on page
-          example: 20
-        sort:
+          example: Huai'an One Pet Products Co., Ltd.
+          description: Supplier name
+        comment:
           type: string
-          description: Order of items on page
-          example: '"[ status:asc, name:desc ]"'
+          example: Поставщик не отправил товар в течение 2 месяцев
+          description: Supplier comment
 
     PatchProductStatusRequest:
       type: object

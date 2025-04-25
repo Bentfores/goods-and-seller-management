@@ -1,11 +1,7 @@
 package bentfores.goods.and.seller.management.server.mapper.v1
 
-import bentfores.goods.and.seller.management.api.model.ProductsInfo
-import bentfores.goods.and.seller.management.api.model.ProductsResponse
+import bentfores.goods.and.seller.management.api.model.ManagementSuppliersInfo
 import bentfores.goods.and.seller.management.api.model.SupplierStatusEnum
-import bentfores.goods.and.seller.management.api.model.SuppliersInfo
-import bentfores.goods.and.seller.management.api.model.SuppliersResponse
-import bentfores.goods.and.seller.management.server.data.entity.Product
 import bentfores.goods.and.seller.management.server.data.entity.Supplier
 import bentfores.goods.and.seller.management.server.data.entity.Supplier.SupplierStatus
 import org.springframework.stereotype.Component
@@ -19,6 +15,7 @@ class SupplierMapper {
       SupplierStatusEnum.NOT_COOPERATING -> SupplierStatus.NOT_COOPERATING
       SupplierStatusEnum.BLACKLISTED -> SupplierStatus.BLACKLISTED
       SupplierStatusEnum.MESSAGE_SENT -> SupplierStatus.MESSAGE_SENT
+      SupplierStatusEnum.WRONG -> SupplierStatus.WRONG
     }
   }
 
@@ -28,12 +25,20 @@ class SupplierMapper {
       SupplierStatus.NOT_COOPERATING -> SupplierStatusEnum.NOT_COOPERATING
       SupplierStatus.BLACKLISTED -> SupplierStatusEnum.BLACKLISTED
       SupplierStatus.MESSAGE_SENT -> SupplierStatusEnum.MESSAGE_SENT
+      SupplierStatus.WRONG -> SupplierStatusEnum.WRONG
     }
   }
 
-  fun mapToSupplierResponse(suppliers: List<Supplier>): SuppliersResponse {
-    return SuppliersResponse(
-      suppliers = suppliers.map { it.supplierUrl }
-    )
+  fun mapToManagementSuppliersInfoList(suppliers: List<Supplier>): List<ManagementSuppliersInfo> {
+    return suppliers.map { mapToManagementSuppliersInfo(it) }
+  }
+
+  fun mapToManagementSuppliersInfo(supplier: Supplier): ManagementSuppliersInfo {
+    return ManagementSuppliersInfo(
+        supplierId = supplier.supplierId!!,
+        status = mapToSupplierStatusEnum(supplier.status),
+        name = supplier.supplierName,
+        comment = supplier.comment
+      )
   }
 }

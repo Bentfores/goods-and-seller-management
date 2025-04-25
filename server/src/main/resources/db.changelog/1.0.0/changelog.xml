@@ -6,5 +6,6 @@
 
     <include file="products.sql" relativeToChangelogFile="true" />
     <include file="suppliers.sql" relativeToChangelogFile="true" />
+    <include file="supplier_products.sql" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

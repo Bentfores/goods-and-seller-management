@@ -32,6 +32,14 @@ management:
           server:
             requests: true
 
+springdoc:
+  swagger-ui:
+    enabled: true
+    useRootPath: false
+    url: /openapi/bentfores-goods-and-seller-management-1.0.0.yaml
+  api-docs:
+    enabled: false
+
 logbook:
   filter:
     enabled: true
